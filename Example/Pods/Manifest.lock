@@ -1,0 +1,17 @@
+PODS:
+  - DMScrollViewStack (0.1.0)
+  - FBSnapshotTestCase (1.5)
+
+DEPENDENCIES:
+  - DMScrollViewStack (from `../`)
+  - FBSnapshotTestCase
+
+EXTERNAL SOURCES:
+  DMScrollViewStack:
+    :path: ../
+
+SPEC CHECKSUMS:
+  DMScrollViewStack: cff594d3be64823ff4e98f33674c9f1748b54248
+  FBSnapshotTestCase: e2914fbaabccea1dcc773d6a16b1c24540642488
+
+COCOAPODS: 0.36.0.beta.1

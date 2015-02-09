@@ -1,0 +1,11 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'DMScrollViewStack', :exclusive => true do
+  pod "DMScrollViewStack", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "DMScrollViewStack", :path => "../"
+
+  pod 'FBSnapshotTestCase'
+end
