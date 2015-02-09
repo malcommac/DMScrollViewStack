@@ -11,7 +11,7 @@
 
 @interface DMScrollViewStack () {
 	NSMutableOrderedSet		*viewsArray;
-	NSMutableArray			*viewsArrayHeight; // expanded heights of the views
+	NSMutableOrderedSet		*viewsArrayHeight; // expanded heights of the views
 	// Dragging support
 	UIView					*draggingView;
 	CGPoint					 draggingLastPoint;
@@ -28,7 +28,7 @@
 	if (self) {
 		// We want to mantain an internal array with the ordered list of the subviews and their best (expanded) height
 		viewsArray = [[NSMutableOrderedSet alloc] init];
-		viewsArrayHeight = [[NSMutableArray alloc] init];
+		viewsArrayHeight = [[NSMutableOrderedSet alloc] init];
 	}
 	return self;
 }
@@ -70,6 +70,7 @@
 	BOOL isSubview = [aSubview isKindOfClass:[UIScrollView class]];
 	[viewsArrayHeight addObject: @( (isSubview ? ((UIScrollView*)aSubview).contentSize.height : CGRectGetHeight(aSubview.frame) ) )];
 
+	
 	if ([aSubview isKindOfClass:[UIScrollView class]]) {
 		((UIScrollView*)aSubview).scrollEnabled = NO;
 		[aSubview addObserver:self forKeyPath:@"contentSize" options:0 context:NULL];
@@ -227,6 +228,7 @@
 				NSInteger exchangeBehindViewIdx = [viewsArray indexOfObject:behindView];
 				NSInteger exchangeWithDraggingViewIdx = [viewsArray indexOfObject:draggingView];
 				[viewsArray moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:exchangeWithDraggingViewIdx] toIndex:exchangeBehindViewIdx];
+				[viewsArrayHeight moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:exchangeWithDraggingViewIdx] toIndex:exchangeBehindViewIdx];
 				[self layoutSubviews:YES completion:NULL];
 			}
 		}

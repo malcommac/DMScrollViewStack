@@ -9,6 +9,13 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol DMScrollViewStackContainer <NSObject>
+
+- (UIScrollView *) scrollView;
+- (UIEdgeInsets) scrollViewInsets;
+
+@end
+
 @interface DMScrollViewStack : UIScrollView { }
 
 @property (nonatomic,readonly)	NSArray		*contentViews;
