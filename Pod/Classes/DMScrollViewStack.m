@@ -9,6 +9,8 @@
 
 #import "DMScrollViewStack.h"
 
+#pragma mark - NSMutableArray (Extras) -
+
 @interface NSMutableArray (Extras)
 
 - (void) moveObjectsAtIndexes:(NSIndexSet*)indexes toIndex:(NSInteger)index;
@@ -28,14 +30,17 @@
 @end
 
 @interface DMScrollViewStack () {
-	NSMutableArray		*viewsArray;
-	NSMutableArray		*viewsArrayHeight; // expanded heights of the views
+	NSMutableArray			*viewsArray;		// ordered list of the items
+	NSMutableArray			*viewsArrayHeight;  // expanded heights of the views
 	// Dragging support
 	UIView					*draggingView;
 	CGPoint					 draggingLastPoint;
 }
 
 @end
+
+
+#pragma mark - DMScrollViewStack -
 
 @implementation DMScrollViewStack
 
@@ -67,21 +72,25 @@
 #pragma mark - Manage Subviews -
 
 - (void) setViews:(NSArray *) aSubviews {
+	[viewsArray makeObjectsPerformSelector:@selector(removeFromSuperview)];
+	[viewsArray removeAllObjects];
+	[viewsArrayHeight removeAllObjects];
+	
 	for (UIView *subview in aSubviews)
-		[self insertSubview:subview atIndex:NSNotFound animated:NO layout:NO scroll:NO];
+		[self insertSubview:subview atIndex:NSNotFound animated:NO layout:NO scroll:NO completion:NULL];
 	[self layoutSubviews];
 }
 
-- (void) addSubview:(UIView *)view animated:(BOOL) aAnimated {
-	[self insertSubview:view atIndex:NSNotFound animated:aAnimated];
+- (void) addSubview:(UIView *) aSubview animated:(BOOL) aAnimated completion:(void(^)(void)) aCompletion {
+	[self insertSubview:aSubview atIndex:NSNotFound animated:aAnimated completion:aCompletion];
 }
 
-- (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated  {
-	[self insertSubview:aSubview atIndex:aIdx animated:aAnimated layout:YES scroll:YES];
+- (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated completion:(void (^)(void)) aCompletion  {
+	[self insertSubview:aSubview atIndex:aIdx animated:aAnimated layout:YES scroll:YES completion:aCompletion];
 }
 
 - (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated
-				layout:(BOOL) layoutImmediately scroll:(BOOL) scrollToMakeVisible {
+				layout:(BOOL) layoutImmediately scroll:(BOOL) scrollToMakeVisible completion:(void (^)(void)) aCompletion {
 	
 
 	BOOL isSubview = [aSubview isKindOfClass:[UIScrollView class]];
@@ -120,10 +129,11 @@
 		[self layoutSubviews:aAnimated completion:^{
 			if (scrollToMakeVisible) // Scroll to make new item visible if required
 				[self scrollRectToVisible:[self rectForSubviewAtIndex:aIdx] animated:aAnimated];
+			if (aCompletion) aCompletion();
 	}];
 }
 
-- (void) removeSubviewAtIndex:(NSInteger) aIdx animated:(BOOL) aAnimated {
+- (void) removeSubviewAtIndex:(NSInteger) aIdx animated:(BOOL) aAnimated completion:(void (^)(void)) aCompletion {
 	UIView *targetView = viewsArray[aIdx];
 	if (aAnimated) {
 		[viewsArray removeObjectAtIndex:aIdx];
@@ -132,6 +142,7 @@
 			if ([targetView isKindOfClass:[UIScrollView class]])
 				[targetView removeObserver:self forKeyPath:@"contentSize"];
 			[targetView removeFromSuperview];
+			if (aCompletion) aCompletion();
 		}];
 	}
 }
@@ -276,7 +287,7 @@
 		}
 		
 		if (isInsideScrollingArea) {
-			// Scroll contentoffset up/down during dragging to make draggingView always visible
+			// Scroll contentoffset up/down during dragging to make draggingView always visible and scrolling around enabled
 			CGFloat visibleOffsetY;
 			if (translation.y > 0) // scrolling down
 				visibleOffsetY = CGRectGetMaxY(draggingView.frame)+MIN(DMScrollingSensitiveAreaHeight,CGRectGetHeight(draggingView.frame));
@@ -284,7 +295,7 @@
 				visibleOffsetY = CGRectGetMinY(draggingView.frame)-MIN(DMScrollingSensitiveAreaHeight,CGRectGetHeight(draggingView.frame));
 			[self scrollRectToVisible:CGRectMake(0, visibleOffsetY, draggingView.frame.size.width, 1.0f) animated:NO];
 		} else if (!isInsideScrollingArea && behindView) {
-			// You want to reorder a subview
+			// You want to reorder a subview, exchange behindView with draggingView and shift
 			CGRect behindViewSensitiveRect = CGRectMake(0.0f,
 														CGRectGetMinY(behindView.frame),
 														CGRectGetWidth(visibleRect),
