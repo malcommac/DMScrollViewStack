@@ -64,24 +64,24 @@
 - (IBAction)add:(id)sender {
 	UIView *vi = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(stackScrollView.frame), 100)];
 	vi.backgroundColor = [self randomColor];
-	[stackScrollView insertSubview:vi atIndex:0 animated:YES];
+	[stackScrollView insertSubview:vi atIndex:0 animated:YES completion:NULL];
 }
 
 - (IBAction)addMiddle:(id)sender {
 	UIView *vi = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(stackScrollView.frame), 100)];
 	vi.backgroundColor = [self randomColor];
-	[stackScrollView insertSubview:vi atIndex:1 animated:YES];
+	[stackScrollView insertSubview:vi atIndex:1 animated:YES completion:NULL];
 }
 
 - (IBAction)addEnd:(id)sender {
 	UIView *vi = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(stackScrollView.frame), 100)];
 	vi.backgroundColor = [self randomColor];
-	[stackScrollView addSubview:vi animated:YES];
+	[stackScrollView addSubview:vi animated:YES completion:NULL];
 }
 
 
 - (IBAction)remove:(id)sender {
-	[stackScrollView removeSubviewAtIndex:stackScrollView.contentViews.count-2 animated:YES];
+	[stackScrollView removeSubviewAtIndex:stackScrollView.contentViews.count-2 animated:YES completion:NULL];
 }
 
 - (void)didReceiveMemoryWarning {

@@ -261,6 +261,11 @@
 		draggingView = gesture.view;
 		draggingView.frame = [self rectForSubviewAtIndex:[viewsArray indexOfObject:draggingView]];
 		[self bringSubviewToFront:draggingView];
+		
+		self.clipsToBounds = NO;
+		[UIView animateWithDuration:0.25f delay:0.0f usingSpringWithDamping:0.5f initialSpringVelocity:0.0f options:0 animations:^{
+			draggingView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+		} completion:NULL];
 
 	} else if (gesture.state == UIGestureRecognizerStateChanged) { // GESTURE CHANGED
 		CGRect visibleRect = CGRectMake(0.0f, self.contentOffset.y, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
@@ -313,8 +318,13 @@
 	
 	} else if (gesture.state == UIGestureRecognizerStateCancelled || gesture.state == UIGestureRecognizerStateEnded) { // GESTURE ENDED
 		// End gesture, place draggingView to it's new position
-		draggingView = nil;
-		[self layoutSubviews:YES completion:NULL];
+		[UIView animateWithDuration:0.25 animations:^{
+			draggingView.transform = CGAffineTransformIdentity;
+		} completion:^(BOOL finished) {
+			self.clipsToBounds = YES;
+			draggingView = nil;
+			[self layoutSubviews:YES completion:NULL];
+		}];
 	}
 }
 
