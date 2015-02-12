@@ -24,7 +24,7 @@ Usage is pretty simple. You can use exposed methods to add or remove subviews. S
 ```
 
 <div style="width:100%;">
-<img src="Example/Demo.gif" align="center" height="50%" width="50%" style="margin-left:20px;">
+<img src="Example/demo.gif" align="center" height="50%" width="50%" style="margin-left:20px;">
 </div>
 
 
