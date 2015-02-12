@@ -9,12 +9,32 @@
 
 #import <UIKit/UIKit.h>
 
+@class DMScrollViewStack;
+
+@protocol DMScrollViewStackReorderDelegate <NSObject>
+
+- (void) stack:(DMScrollViewStack *) stack willMoveSubview:(UIView *) aSubview atIndex:(NSInteger) aIdx;
+- (void) stack:(DMScrollViewStack *) stack didMoveSubview:(UIView *) aSubview;
+
+@end
+
+
 @interface DMScrollViewStack : UIScrollView { }
 
 /**
  *  Read only copy of the subviews inside the stack
  */
 @property (nonatomic,readonly)	NSArray		*contentViews;
+
+/**
+ *  YES to allows reordering with long-tap on subview and drag
+ */
+@property (nonatomic,assign)	BOOL		 allowsReordering;
+
+/**
+ *  Reorder actions delegate
+ */
+@property (nonatomic,weak)		id <DMScrollViewStackReorderDelegate>	reorderDelegate;
 
 /**
  *  Set order subviews of the stack (from the top)

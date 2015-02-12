@@ -42,6 +42,7 @@ it, simply add the following line to your Podfile:
 ## Author
 
 Daniele Margutti
+
 Mail: [me@danielemargutti.com](mailto://me@danielemargutti.com)
 
 Web: [danielemargutti.com](http://www.danielemargutti.com)

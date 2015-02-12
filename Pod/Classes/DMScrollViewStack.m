@@ -8,8 +8,29 @@
 //
 
 #import "DMScrollViewStack.h"
+#import <objc/runtime.h>
 
 #pragma mark - NSMutableArray (Extras) -
+
+const char kDMScrollViewStackReorderGesture;
+
+@interface UIView (Extras)
+
+@property (nonatomic,retain)	UILongPressGestureRecognizer	*reorderGesture;
+
+@end
+
+@implementation UIView (Extras)
+
+- (void)setReorderGesture:(UILongPressGestureRecognizer *)reorderGesture {
+	objc_setAssociatedObject(self, &kDMScrollViewStackReorderGesture, reorderGesture, OBJC_ASSOCIATION_ASSIGN);
+}
+
+- (UILongPressGestureRecognizer*) reorderGesture {
+	return objc_getAssociatedObject(self, &kDMScrollViewStackReorderGesture);
+}
+
+@end
 
 @interface NSMutableArray (Extras)
 
@@ -35,6 +56,7 @@
 	// Dragging support
 	UIView					*draggingView;
 	CGPoint					 draggingLastPoint;
+	NSInteger				 draggingViewInitialIdx;
 }
 
 @end
@@ -57,10 +79,24 @@
 }
 
 - (void)dealloc {
-	for (UIView *subview in viewsArray) {
-		if ([subview isKindOfClass:[UIScrollView class]])
-			[subview removeObserver:self forKeyPath:@"contentSize"];
+	for (UIView *subview in viewsArray)
+		[self prepareViewForRemove:subview];
+}
+
+- (void) prepareViewForRemove:(UIView *) aSubview {
+	// remove observer
+	if ([aSubview isKindOfClass:[UIScrollView class]])
+		[aSubview removeObserver:self forKeyPath:@"contentSize"];
+	
+	// remove gesture
+	NSInteger idx = [viewsArray indexOfObject:aSubview];
+	if (aSubview.reorderGesture) {
+		[aSubview removeGestureRecognizer:aSubview.reorderGesture];
+		aSubview.reorderGesture = nil;
 	}
+	[aSubview removeFromSuperview];
+	[viewsArray removeObject:aSubview];
+	[viewsArrayHeight removeObjectAtIndex:idx];
 }
 
 #pragma mark - Properties -
@@ -114,7 +150,8 @@
 		[aSubview addObserver:self forKeyPath:@"contentSize" options:0 context:NULL];
 	}
 	
-	[self addLongTapGestureRecognizerTo:aSubview];
+	if (_allowsReordering)
+		[self addLongTapGestureRecognizerTo:aSubview];
 	
 	// We will use it to perform a slide from bottom animation on add
 	if (aIdx > 0 && aAnimated) {
@@ -139,9 +176,7 @@
 		[viewsArray removeObjectAtIndex:aIdx];
 		[self layoutSubviews:YES completion:^{
 			targetView.alpha = 0.0f;
-			if ([targetView isKindOfClass:[UIScrollView class]])
-				[targetView removeObserver:self forKeyPath:@"contentSize"];
-			[targetView removeFromSuperview];
+			[self prepareViewForRemove:targetView];
 			if (aCompletion) aCompletion();
 		}];
 	}
@@ -248,11 +283,24 @@
 	UILongPressGestureRecognizer *press = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLong:)];
 	[aSubview setUserInteractionEnabled:YES];
 	[aSubview addGestureRecognizer:press];
+	aSubview.reorderGesture = press;
 	return YES;
 }
 
 #define DMScrollingSensitiveAreaHeight	50
 #define DMScrollingScrollingSpace		20
+
+- (void)setAllowsReordering:(BOOL)allowsReordering {
+	for (UIView *subview in viewsArray) {
+		if (!allowsReordering) {
+			[subview removeGestureRecognizer:subview.reorderGesture];
+			subview.reorderGesture = nil;
+		} else {
+			if (!subview.reorderGesture)
+				[self addLongTapGestureRecognizerTo:subview];
+		}
+	}
+}
 
 - (void) handleLong:(UILongPressGestureRecognizer *) gesture {
 	if (gesture.state == UIGestureRecognizerStateBegan) { // GESTURE BEGAN
@@ -260,6 +308,7 @@
 		draggingLastPoint = [gesture locationInView:self];
 		draggingView = gesture.view;
 		draggingView.frame = [self rectForSubviewAtIndex:[viewsArray indexOfObject:draggingView]];
+		draggingViewInitialIdx = [viewsArray indexOfObject:draggingView];
 		[self bringSubviewToFront:draggingView];
 		
 		self.clipsToBounds = NO;
@@ -308,6 +357,10 @@
 			if (CGRectIntersectsRect(draggingView.frame, behindViewSensitiveRect)) {
 				NSInteger exchangeBehindViewIdx = [viewsArray indexOfObject:behindView];
 				NSInteger exchangeWithDraggingViewIdx = [viewsArray indexOfObject:draggingView];
+				
+				if ([_reorderDelegate respondsToSelector:@selector(stack:willMoveSubview:atIndex:)])
+					[_reorderDelegate stack:self willMoveSubview:draggingView atIndex:exchangeWithDraggingViewIdx];
+				
 				[viewsArray moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:exchangeWithDraggingViewIdx] toIndex:exchangeBehindViewIdx];
 				[viewsArrayHeight moveObjectsAtIndexes:[NSIndexSet indexSetWithIndex:exchangeWithDraggingViewIdx] toIndex:exchangeBehindViewIdx];
 				[self layoutSubviews:YES completion:NULL];
@@ -318,6 +371,11 @@
 	
 	} else if (gesture.state == UIGestureRecognizerStateCancelled || gesture.state == UIGestureRecognizerStateEnded) { // GESTURE ENDED
 		// End gesture, place draggingView to it's new position
+		
+		if ([_reorderDelegate respondsToSelector:@selector(stack:didMoveSubview:)] &&
+			draggingViewInitialIdx != [viewsArray indexOfObject:draggingView])
+			[_reorderDelegate stack:self didMoveSubview:draggingView];
+		
 		[UIView animateWithDuration:0.25 animations:^{
 			draggingView.transform = CGAffineTransformIdentity;
 		} completion:^(BOOL finished) {
