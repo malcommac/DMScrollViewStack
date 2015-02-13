@@ -9,20 +9,14 @@
 
 Pod::Spec.new do |s|
   s.name             = "DMScrollViewStack"
-  s.version          = "0.1.0"
+  s.version          = "0.1.1"
   s.summary          = "A short description of DMScrollViewStack."
-  s.description      = <<-DESC
-                       An optional longer description of DMScrollViewStack
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
-                       DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/DMScrollViewStack"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
+  s.description      = "DMScrollViewStack is a UIScrollView subclass that efficiently handles a vertical stack of multiple scrollviews"
+  s.homepage         = "https://github.com/malcommac/DMScrollViewStack"
   s.license          = 'MIT'
   s.author           = { "Daniele Margutti" => "me@danielemargutti.com" }
   s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/DMScrollViewStack.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+s.social_media_url = 'https://twitter.com/danielemargutti'
 
   s.platform     = :ios, '7.0'
   s.requires_arc = true
@@ -31,8 +25,4 @@ Pod::Spec.new do |s|
   s.resource_bundles = {
     'DMScrollViewStack' => ['Pod/Assets/*.png']
   }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
