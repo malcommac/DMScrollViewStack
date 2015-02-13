@@ -10,8 +10,8 @@
 Pod::Spec.new do |s|
   s.name             = "DMScrollViewStack"
   s.version          = "0.1.1"
-  s.summary          = "A short description of DMScrollViewStack."
-  s.description      = "DMScrollViewStack is a UIScrollView subclass that efficiently handles a vertical stack of multiple scrollviews"
+  s.summary          = "DMScrollViewStack is a UIScrollView subclass that efficiently handles a vertical stack of multiple scrollviews."
+  s.description      = "DMScrollViewStack is a UIScrollView subclass that efficiently handles a vertical stack of multiple scrollviews. You can layout vertically your subviews without worrying about memory usage and cells caching if your subview is a table or a collectionview."
   s.homepage         = "https://github.com/malcommac/DMScrollViewStack"
   s.license          = 'MIT'
   s.author           = { "Daniele Margutti" => "me@danielemargutti.com" }
