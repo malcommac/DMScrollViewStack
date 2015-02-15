@@ -71,6 +71,7 @@ const char kDMScrollViewStackReorderGesture;
 - (instancetype)initWithFrame:(CGRect)frame {
 	self = [super initWithFrame:frame];
 	if (self) {
+		_allowsReordering = YES;
 		// We want to mantain an internal array with the ordered list of the subviews and their best (expanded) height
 		viewsArray = [[NSMutableArray alloc] init];
 		viewsArrayHeight = [[NSMutableArray alloc] init];
@@ -303,6 +304,15 @@ const char kDMScrollViewStackReorderGesture;
 }
 
 - (void) handleLong:(UILongPressGestureRecognizer *) gesture {
+	
+	if ([self.reorderDelegate respondsToSelector:@selector(stack:shouldMoveSubview:atIndex:)] &&
+		![self.reorderDelegate stack:self shouldMoveSubview:gesture.view atIndex:[viewsArray indexOfObject:gesture.view]]) {
+		// This view does not support reorder
+		gesture.enabled = NO;
+		gesture.enabled = YES;
+		return;
+	}
+	
 	if (gesture.state == UIGestureRecognizerStateBegan) { // GESTURE BEGAN
 		// Save the instance of dragging view so we don't touch it's frame during layoutSubviews while a dragging session is active
 		draggingLastPoint = [gesture locationInView:self];

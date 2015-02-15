@@ -8,9 +8,10 @@
 
 #import "ExampleViewController.h"
 
-@interface ExampleViewController () <UITableViewDataSource,UITableViewDelegate> {
+@interface ExampleViewController () <UITableViewDataSource,UITableViewDelegate,DMScrollViewStackReorderDelegate> {
 	DMScrollViewStack		*stackScrollView;
 	
+	// Example views
 	IBOutlet		UIView			*view1;
 	IBOutlet		UIView			*view2;
 	IBOutlet		UIView			*view3;
@@ -38,18 +39,29 @@
 	tableView.dataSource = self;
 	self.viewsArray = @[view1,view2,view3,tableView,view4];
 	
-
-	
 	stackScrollView = [[DMScrollViewStack alloc] initWithFrame:UIEdgeInsetsInsetRect(self.view.bounds, UIEdgeInsetsMake(20, 10, 100, 10))];
 	stackScrollView.backgroundColor = [UIColor lightGrayColor];
 	stackScrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+	stackScrollView.reorderDelegate = self;
 	[self.view addSubview:stackScrollView];
-
-//	for (UIView *subview in self.viewsArray) {
-//		[stackScrollView addSubview:subview animated:NO];
-//	}
 	[stackScrollView setViews:self.viewsArray];
 }
+
+#pragma mark - DMScrollViewStackReorderDelegate -
+
+- (BOOL) stack:(DMScrollViewStack *)stack shouldMoveSubview:(UIView *) aSubview atIndex:(NSInteger) aIdx {
+	return YES;
+}
+
+- (void)stack:(DMScrollViewStack *)stack willMoveSubview:(UIView *)aSubview atIndex:(NSInteger)aIdx {
+	
+}
+
+- (void)stack:(DMScrollViewStack *)stack didMoveSubview:(UIView *)aSubview {
+	
+}
+
+#pragma mark - Public Methods -
 
 - (UIColor *) randomColor {
 	NSInteger aRedValue = arc4random()%255;
@@ -88,13 +100,15 @@
     [super didReceiveMemoryWarning];
 }
 
+#pragma mark - Table DataSource -
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	return 20;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
-	cell.textLabel.text = [NSString stringWithFormat:@"Row %ld",indexPath.row];
+	cell.textLabel.text = [NSString stringWithFormat:@"Row %d",indexPath.row];
 	return cell;
 }
 
