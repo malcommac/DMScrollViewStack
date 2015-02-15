@@ -80,8 +80,14 @@ const char kDMScrollViewStackReorderGesture;
 }
 
 - (void)dealloc {
-	for (UIView *subview in viewsArray)
-		[self prepareViewForRemove:subview];
+	NSArray *list = [viewsArray copy];
+	for (UIView *subview in list) {
+		if ([subview isKindOfClass:[UIScrollView class]]) {
+			[subview removeObserver:self forKeyPath:@"contentSize"];
+		}
+	}
+	viewsArray = nil;
+	viewsArrayHeight = nil;
 }
 
 - (void) prepareViewForRemove:(UIView *) aSubview {
@@ -109,13 +115,16 @@ const char kDMScrollViewStackReorderGesture;
 #pragma mark - Manage Subviews -
 
 - (void) setViews:(NSArray *) aSubviews {
-	[viewsArray makeObjectsPerformSelector:@selector(removeFromSuperview)];
+	for (UIView *subview in [viewsArray copy])
+		[self prepareViewForRemove:subview];
 	[viewsArray removeAllObjects];
 	[viewsArrayHeight removeAllObjects];
 	
-	for (UIView *subview in aSubviews)
-		[self insertSubview:subview atIndex:NSNotFound animated:NO layout:NO scroll:NO completion:NULL];
-	[self layoutSubviews];
+	if (aSubviews) {
+		for (UIView *subview in aSubviews)
+			[self insertSubview:subview atIndex:NSNotFound animated:NO layout:NO scroll:NO completion:NULL];
+		[self layoutSubviews];
+	}
 }
 
 - (void) addSubview:(UIView *) aSubview animated:(BOOL) aAnimated completion:(void(^)(void)) aCompletion {
@@ -129,7 +138,7 @@ const char kDMScrollViewStackReorderGesture;
 - (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated
 				layout:(BOOL) layoutImmediately scroll:(BOOL) scrollToMakeVisible completion:(void (^)(void)) aCompletion {
 	
-
+	
 	BOOL isSubview = [aSubview isKindOfClass:[UIScrollView class]];
 	[self addSubview:aSubview];
 	[viewsArray addObject:aSubview];
@@ -168,7 +177,7 @@ const char kDMScrollViewStackReorderGesture;
 			if (scrollToMakeVisible) // Scroll to make new item visible if required
 				[self scrollRectToVisible:[self rectForSubviewAtIndex:aIdx] animated:aAnimated];
 			if (aCompletion) aCompletion();
-	}];
+		}];
 }
 
 - (void) removeSubviewAtIndex:(NSInteger) aIdx animated:(BOOL) aAnimated completion:(void (^)(void)) aCompletion {
@@ -325,7 +334,7 @@ const char kDMScrollViewStackReorderGesture;
 		[UIView animateWithDuration:0.25f delay:0.0f usingSpringWithDamping:0.5f initialSpringVelocity:0.0f options:0 animations:^{
 			draggingView.transform = CGAffineTransformMakeScale(1.05, 1.05);
 		} completion:NULL];
-
+		
 	} else if (gesture.state == UIGestureRecognizerStateChanged) { // GESTURE CHANGED
 		CGRect visibleRect = CGRectMake(0.0f, self.contentOffset.y, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
 		// Evaluate the translation and move the draggingView's y coordinate according to it
@@ -378,7 +387,7 @@ const char kDMScrollViewStackReorderGesture;
 		}
 		
 		draggingLastPoint = location;
-	
+		
 	} else if (gesture.state == UIGestureRecognizerStateCancelled || gesture.state == UIGestureRecognizerStateEnded) { // GESTURE ENDED
 		// End gesture, place draggingView to it's new position
 		
