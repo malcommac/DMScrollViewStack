@@ -13,8 +13,10 @@
 
 @protocol DMScrollViewStackReorderDelegate <NSObject>
 
+@optional
 - (void) stack:(DMScrollViewStack *) stack willMoveSubview:(UIView *) aSubview atIndex:(NSInteger) aIdx;
 - (void) stack:(DMScrollViewStack *) stack didMoveSubview:(UIView *) aSubview;
+- (BOOL) stack:(DMScrollViewStack *)stack shouldMoveSubview:(UIView *) aSubview atIndex:(NSInteger) aIdx;
 
 @end
 
