@@ -132,7 +132,7 @@ const char kDMScrollViewStackReorderGesture;
 }
 
 - (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated completion:(void (^)(void)) aCompletion  {
-	[self insertSubview:aSubview atIndex:aIdx animated:aAnimated layout:YES scroll:YES completion:aCompletion];
+	[self insertSubview:aSubview atIndex:aIdx animated:aAnimated layout:YES scroll:NO completion:aCompletion];
 }
 
 - (void) insertSubview:(UIView *)aSubview atIndex:(NSInteger) aIdx animated:(BOOL) aAnimated
@@ -301,6 +301,7 @@ const char kDMScrollViewStackReorderGesture;
 #define DMScrollingScrollingSpace		20
 
 - (void)setAllowsReordering:(BOOL)allowsReordering {
+	_allowsReordering = allowsReordering;
 	for (UIView *subview in viewsArray) {
 		if (!allowsReordering) {
 			[subview removeGestureRecognizer:subview.reorderGesture];
