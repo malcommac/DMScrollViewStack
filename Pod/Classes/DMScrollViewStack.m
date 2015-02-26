@@ -71,12 +71,25 @@ const char kDMScrollViewStackReorderGesture;
 - (instancetype)initWithFrame:(CGRect)frame {
 	self = [super initWithFrame:frame];
 	if (self) {
-		_allowsReordering = YES;
-    // We want to maintain an internal array with the ordered list of the subviews and their best (expanded) height
-		viewsArray = [[NSMutableArray alloc] init];
-		viewsArrayHeight = [[NSMutableArray alloc] init];
-	}
+        [self setup];
+    }
 	return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder {
+    self = [super initWithCoder:coder];
+
+    if (self) {
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setup {
+    _allowsReordering = YES;
+    // We want to maintain an internal array with the ordered list of the subviews and their best (expanded) height
+    viewsArray = [[NSMutableArray alloc] init];
+    viewsArrayHeight = [[NSMutableArray alloc] init];
 }
 
 - (void)dealloc {
