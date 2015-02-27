@@ -86,6 +86,7 @@ const char kDMScrollViewStackReorderGesture;
 }
 
 - (void)setup {
+	_layoutMode = DMScrollViewStackLayoutModeZeroOnlyScrollView;
     _allowsReordering = YES;
     // We want to maintain an internal array with the ordered list of the subviews and their best (expanded) height
     viewsArray = [[NSMutableArray alloc] init];
@@ -138,6 +139,12 @@ const char kDMScrollViewStackReorderGesture;
 			[self insertSubview:subview atIndex:NSNotFound animated:NO layout:NO scroll:NO completion:NULL];
 		[self layoutSubviews];
 	}
+}
+
+- (void) scrollToSubview:(UIView *) aSubview animated:(BOOL)animated {
+	if (![viewsArray containsObject:aSubview]) return;
+	CGRect idealFrame = [self rectForSubviewAtIndex:[viewsArray indexOfObject:aSubview]];
+	[self scrollRectToVisible:idealFrame animated:animated];
 }
 
 - (void) addSubview:(UIView *) aSubview animated:(BOOL) aAnimated completion:(void(^)(void)) aCompletion {
@@ -277,7 +284,10 @@ const char kDMScrollViewStackReorderGesture;
 					
 				} else {
 					// If subview is invisible we can set it's frame to zero (with tables and collection view we can avoid loading hidden cells)
-					subviewFrame = CGRectMake(0, subviewFrame.origin.y, CGRectGetWidth(self.frame), 0);
+					if (_layoutMode == DMScrollViewStackLayoutModeZeroAll || isScrollView)
+						subviewFrame = CGRectMake(0, subviewFrame.origin.y, CGRectGetWidth(self.frame), 0);
+					else
+						subviewFrame = idealFrame;
 				}
 				subview.frame = subviewFrame;
 			}

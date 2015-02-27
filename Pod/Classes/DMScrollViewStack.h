@@ -9,6 +9,11 @@
 
 #import <UIKit/UIKit.h>
 
+typedef NS_ENUM(NSInteger, DMScrollViewStackLayoutMode) {
+	DMScrollViewStackLayoutModeZeroAll,					// set to CGRectZero all subviews (classic uiviews and scroll view subclasses)
+	DMScrollViewStackLayoutModeZeroOnlyScrollView		// set to CGRectZero only scroll view subclasses (this is the default behaviour)
+};
+
 @class DMScrollViewStack;
 
 @protocol DMScrollViewStackReorderDelegate <NSObject>
@@ -32,6 +37,11 @@
  *  YES to allows reordering with long-tap on subview and drag
  */
 @property (nonatomic,assign)	BOOL		 allowsReordering;
+
+/**
+ *  Setup layout mode in -layoutSubviews
+*/
+@property (nonatomic,assign)	DMScrollViewStackLayoutMode	layoutMode;
 
 /**
  *  Reorder actions delegate
@@ -73,5 +83,12 @@
  */
 - (void) removeSubviewAtIndex:(NSInteger) aIdx animated:(BOOL) aAnimated completion:(void (^)(void)) aCompletion;
 
+/**
+ *  Scroll to specified subview
+ *
+ *  @param aSubview	target subview
+ *	@param aAnimated YES to animate scroll
+**/
+- (void) scrollToSubview:(UIView *) aSubview animated:(BOOL)animated;
 
 @end
